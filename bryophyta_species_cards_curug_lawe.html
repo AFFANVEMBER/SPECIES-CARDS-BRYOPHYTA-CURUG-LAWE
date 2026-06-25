@@ -1,0 +1,823 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+  .bryo-root {
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+    background: transparent;
+  }
+
+  .bryo-header {
+    padding: 2rem 0 1.5rem;
+    border-bottom: 1px solid var(--color-border-tertiary);
+    margin-bottom: 2rem;
+  }
+  .bryo-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .bryo-atlas-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .bryo-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+  .bryo-header h1 em {
+    font-style: italic;
+    color: #3B6D11;
+  }
+  .bryo-header-meta {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    margin-top: 8px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .bryo-meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--color-background-secondary);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--color-border-tertiary);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+  .filter-btn {
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { background: var(--color-background-secondary); }
+  .filter-btn.active {
+    background: #27500A;
+    color: #EAF3DE;
+    border-color: #27500A;
+  }
+  .filter-label {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .species-card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .species-card:hover {
+    border-color: var(--color-border-primary);
+    transform: translateY(-2px);
+  }
+  .species-card.hidden { display: none; }
+
+  .card-accent {
+    height: 3px;
+    width: 100%;
+  }
+  .accent-hepaticae { background: #3B6D11; }
+  .accent-musci { background: #0F6E56; }
+
+  .card-img-wrap {
+    width: 100%;
+    height: 130px;
+    overflow: hidden;
+    background: var(--color-background-secondary);
+    position: relative;
+  }
+  .card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .specimen-icon {
+    font-size: 36px;
+    opacity: 0.55;
+    line-height: 1;
+  }
+  .specimen-bg-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: repeating-linear-gradient(
+      45deg,
+      currentColor 0, currentColor 1px,
+      transparent 0, transparent 50%
+    );
+    background-size: 8px 8px;
+  }
+
+  .card-body {
+    padding: 12px 14px 14px;
+  }
+
+  .card-code {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .card-name-sci {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+  .card-name-author {
+    font-family: 'Playfair Display', serif;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--color-text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  .card-family {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .card-divider {
+    height: 0.5px;
+    background: var(--color-border-tertiary);
+    margin: 8px 0;
+  }
+
+  .card-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .badge-hepaticae {
+    background: #EAF3DE;
+    color: #27500A;
+    border: 0.5px solid #C0DD97;
+  }
+  .badge-musci {
+    background: #E1F5EE;
+    color: #085041;
+    border: 0.5px solid #9FE1CB;
+  }
+
+  .card-morfo {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+  .card-habitat {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    margin-top: 5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    line-height: 1.4;
+  }
+
+  .card-detail-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 6px 0;
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    background: transparent;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .card-detail-btn:hover {
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+  }
+
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .detail-overlay.open { display: flex; }
+
+  .detail-modal {
+    background: var(--color-background-primary);
+    border-radius: 16px;
+    border: 0.5px solid var(--color-border-secondary);
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .detail-accent {
+    height: 4px;
+    border-radius: 16px 16px 0 0;
+  }
+  .detail-inner {
+    padding: 24px 28px 28px;
+  }
+  .detail-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  .detail-code {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .detail-name-sci {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.25;
+    margin-bottom: 3px;
+  }
+  .detail-author {
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+    margin-bottom: 16px;
+  }
+  .detail-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .detail-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  .db-family { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+  .db-type-h { background: #EAF3DE; color: #27500A; border: 0.5px solid #C0DD97; }
+  .db-type-m { background: #E1F5EE; color: #085041; border: 0.5px solid #9FE1CB; }
+  .db-sub { background: var(--color-background-secondary); color: var(--color-text-tertiary); border: 0.5px solid var(--color-border-tertiary); }
+
+  .detail-section {
+    margin-bottom: 16px;
+  }
+  .detail-section-title {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .detail-section-body {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+  }
+
+  .detail-taxa-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .taxa-item {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    border: 0.5px solid var(--color-border-tertiary);
+  }
+  .taxa-rank {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-text-tertiary);
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  .taxa-value {
+    font-size: 12px;
+    color: var(--color-text-primary);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+  }
+  .taxa-value.no-italic { font-style: normal; font-family: 'Inter', sans-serif; }
+
+  .detail-diag-strip {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 12px 14px;
+    border: 0.5px solid var(--color-border-tertiary);
+    margin-bottom: 16px;
+  }
+  .diag-strip-title {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .diag-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .diag-label {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+  .diag-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--color-border-tertiary);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .diag-bar { height: 100%; border-radius: 2px; }
+  .diag-val {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    min-width: 36px;
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--color-border-tertiary);
+  }
+  .stat-item { text-align: center; flex: 1; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 3px;
+  }
+</style>
+
+<div class="bryo-root">
+  <h2 class="sr-only">Atlas Mini Bryophyta Curug Lawe — 20 kartu identifikasi spesies</h2>
+
+  <div class="bryo-header">
+    <div class="bryo-header-top">
+      <div>
+        <div class="bryo-atlas-label">Atlas Mini Bryophyta · Curug Lawe</div>
+        <h1>Kartu Identifikasi <em>Bryophyta</em></h1>
+        <div class="bryo-header-meta">
+          <span class="bryo-meta-chip"><i class="ti ti-map-pin" style="font-size:12px" aria-hidden="true"></i> Kab. Semarang, Jawa Tengah</span>
+          <span class="bryo-meta-chip"><i class="ti ti-stack" style="font-size:12px" aria-hidden="true"></i> 20 Takson</span>
+          <span class="bryo-meta-chip"><i class="ti ti-building-arch" style="font-size:12px" aria-hidden="true"></i> 15 Famili</span>
+          <span class="bryo-meta-chip"><i class="ti ti-checks" style="font-size:12px" aria-hidden="true"></i> POWO · GBIF · WFO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Filter</span>
+    <button class="filter-btn active" onclick="filterCards('all', this)">Semua (20)</button>
+    <button class="filter-btn" onclick="filterCards('hepaticae', this)">Lumut Hati (11)</button>
+    <button class="filter-btn" onclick="filterCards('musci', this)">Lumut Daun (9)</button>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid"></div>
+
+  <div class="stats-row">
+    <div class="stat-item"><div class="stat-num">20</div><div class="stat-label">Takson</div></div>
+    <div class="stat-item"><div class="stat-num">15</div><div class="stat-label">Famili</div></div>
+    <div class="stat-item"><div class="stat-num">11</div><div class="stat-label">Lumut Hati</div></div>
+    <div class="stat-item"><div class="stat-num">9</div><div class="stat-label">Lumut Daun</div></div>
+  </div>
+</div>
+
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+  <div class="detail-modal" id="detailModal">
+    <div class="detail-accent" id="detailAccent"></div>
+    <div class="detail-inner">
+      <button class="detail-close" onclick="closeDetailBtn()"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TAXA = [
+  {
+    code: "CL-01", type: "hepaticae",
+    nameSci: "Marchantia polymorpha", author: "L.",
+    family: "Marchantiaceae", order: "Marchantiales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "🌿",
+    morfo: "Talus pipih bercabang dikotom dengan gemma cup berbentuk mangkuk di permukaan dorsal.",
+    habitat: "Batu & tanah lembap tepi aliran air, sering di area terbuka tergenang.",
+    diag: { "Lebar talus": 65, "Percabangan": 80, "Kompleksitas": 70, "Kelembapan": 90 },
+    catatan: "Kosmopolit luas; salah satu hepatik paling mudah dikenali karena gemma cup yang khas dan areolasi poligonal pada talus. Dijadikan model sistem dalam penelitian fisiologi tumbuhan."
+  },
+  {
+    code: "CL-02", type: "musci",
+    nameSci: "Dawsonia longisseta", author: "Hampe",
+    family: "Polytrichaceae", order: "Polytrichales", classTax: "Polytrichopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🌲",
+    morfo: "Tumbuh tegak menyerupai pohon miniatur, memiliki seta sporofit panjang dan daun dengan lamela fotosintesis.",
+    habitat: "Tanah hutan yang lembap dan teduh, preferensi substrat bersifat asam.",
+    diag: { "Tinggi talus": 90, "Sporofit": 85, "Tegakan": 95, "Lamela": 80 },
+    catatan: "Genus Dawsonia mencakup lumut daun tertinggi yang diketahui. Struktur daunnya dengan lamella fotosintetik analog konvergen dengan adaptasi kloroplas tumbuhan vaskular."
+  },
+  {
+    code: "CL-03", type: "musci",
+    nameSci: "Brachythecium plumosum", author: "(Hedw.) Schimp.",
+    family: "Brachytheciaceae", order: "Hypnales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🪨",
+    morfo: "Batang merayap, percabangan menyerupai bulu (pinnate), berkilau saat kering.",
+    habitat: "Batu lembap dan permukaan kayu lapuk, terutama di tepi aliran.",
+    diag: { "Percabangan": 85, "Kilap": 75, "Substrat batu": 80, "Kelembapan": 70 },
+    catatan: "Kelompok pleurokarp yang sangat beragam secara morfologi; identifikasi spesies level sering membutuhkan karakter mikro seperti bentuk sel alar."
+  },
+  {
+    code: "CL-04", type: "hepaticae",
+    nameSci: "Riccardia chamedryfolia", author: "(With.) Grolle",
+    family: "Aneuraceae", order: "Metzgeriales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "🌿",
+    morfo: "Talus halus menyirip, menyerupai miniatur pakis, tanpa costa terdefinisi jelas.",
+    habitat: "Substrat kayu lapuk dan batu di tempat sangat teduh dan lembap.",
+    diag: { "Penyirip": 90, "Kehalusan": 85, "Keteduhan": 95, "Substrat kayu": 80 },
+    catatan: "Metzgeriales adalah ordo hepatik taloid sederhana, berbeda dari Marchantiales yang memiliki talus kompleks. Riccardia merupakan penanda mikrohabitat yang baik untuk tutupan hutan berkualitas."
+  },
+  {
+    code: "CL-05", type: "musci",
+    nameSci: "Hypnum cupressiforme", author: "Hedw.",
+    family: "Hypnaceae", order: "Hypnales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🌾",
+    morfo: "Daun melengkung satu arah (falcate-secund), membentuk hamparan rapat berwarna hijau kekuningan.",
+    habitat: "Batu, tanah, dan batang pohon lembap; toleransi substrat sangat luas.",
+    diag: { "Falcate daun": 90, "Hamparan": 85, "Toleransi": 95, "Frekuensi": 80 },
+    catatan: "Salah satu lumut paling kosmopolit di dunia. Karakter falcate-secund konsisten dan diagnostik, meski ada variasi intraspesifik yang cukup besar."
+  },
+  {
+    code: "CL-06", type: "musci",
+    nameSci: "Fissidens braunii", author: "Dozy & Molk.",
+    family: "Fissidentaceae", order: "Fissidentales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🌿",
+    morfo: "Daun tersusun dua baris berpasangan (distichous) dengan vaginant lamina yang khas membungkus batang.",
+    habitat: "Tanah basah lembap, semi-akuatik di tepian aliran.",
+    diag: { "Distichous": 95, "Vaginant lam.": 90, "Semi-akuatik": 75, "Ukuran": 60 },
+    catatan: "Fissidentaceae adalah famili monogenerik yang mudah dikenal secara instan dari tatanan daun dua baris yang unik. Vaginant lamina adalah synapomorphy famili ini."
+  },
+  {
+    code: "CL-07", type: "hepaticae",
+    nameSci: "Dumortiera hirsuta", author: "(Sw.) Nees",
+    family: "Dumortieraceae", order: "Marchantiales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "💧",
+    morfo: "Talus lebar dan tebal, tepi talus berambut halus, permukaan dorsal tanpa areolasi.",
+    habitat: "Tanah basah aktif aliran air, seringkali tergenang sebagian.",
+    diag: { "Lebar talus": 90, "Rambut tepi": 85, "Akuatik": 90, "Ketebalan": 80 },
+    catatan: "Berbeda dari Marchantia karena absennya pori udara dan areolasi. Dumortieraceae adalah famili monogenerik dalam Marchantiales, penanda kuat habitat higrofit permanen."
+  },
+  {
+    code: "CL-08", type: "hepaticae",
+    nameSci: "Bazzania trilobata", author: "(L.) Gray",
+    family: "Lepidoziaceae", order: "Jungermanniales", classTax: "Jungermanniopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Berscale",
+    icon: "🍃",
+    morfo: "Daun berlobat tiga, percabangan khas berbentuk seperti cambuk (flagella), daun underleaf hadir.",
+    habitat: "Kayu lapuk, humus & batuan lembap di hutan primer.",
+    diag: { "Trilobus": 90, "Flagella": 85, "Underleaf": 80, "Hutan primer": 85 },
+    catatan: "Jungermanniopsida (hepatik berdaun) berbeda fundamental dari Marchantiopsida (hepatik taloid). Bazzania adalah genus besar Lepidoziaceae dengan flagella sebagai karakter diagnostik utama."
+  },
+  {
+    code: "CL-09", type: "hepaticae",
+    nameSci: "Lepidozia reptans", author: "(L.) Dumort.",
+    family: "Lepidoziaceae", order: "Jungermanniales", classTax: "Jungermanniopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Berscale",
+    icon: "🍃",
+    morfo: "Daun kecil bercangap empat, batang merayap rapat, percabangan pinnate teratur.",
+    habitat: "Kayu lapuk dan tanah berhumus di hutan tertutup.",
+    diag: { "4-cangap": 95, "Ukuran kecil": 90, "Humus": 80, "Merayap": 85 },
+    catatan: "Satu famili dengan Bazzania. Lepidozia reptans mudah dikenali dari ukurannya yang kecil dan segmentasi daun empat. Indikator mikrohabitat humus hutan tua."
+  },
+  {
+    code: "CL-10", type: "hepaticae",
+    nameSci: "Marchantia inflexa", author: "Nees & Mont.",
+    family: "Marchantiaceae", order: "Marchantiales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "🌿",
+    morfo: "Talus lebar, anteridiofor dan arkegonofor bertangkai jelas, gemma cup hadir.",
+    habitat: "Tanah, batu & kayu lapuk lembap; toleransi habitat cukup luas.",
+    diag: { "Reseptakel": 85, "Gemma cup": 80, "Lebar talus": 75, "Kelembapan": 80 },
+    catatan: "Marchantia inflexa adalah spesies Neotropis dan Asia Tenggara, berbeda dari M. polymorpha dalam detail morfologi reseptakel. Keduanya sering simpatrik di substrat serupa."
+  },
+  {
+    code: "CL-11", type: "musci",
+    nameSci: "Thuidium tamariscinum", author: "(Hedw.) Schimp.",
+    family: "Thuidiaceae", order: "Hypnales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🌲",
+    morfo: "Percabangan majemuk menyerupai pakis mini (tripinnate), paraphyllia hadir di batang.",
+    habitat: "Tanah & batu di hutan yang sangat teduh dan lembap.",
+    diag: { "Tripinnate": 95, "Paraphyllia": 90, "Keteduhan": 85, "Keindahan": 95 },
+    catatan: "Thuidium mudah dikenali dari percabangan tripinnate yang indah. Paraphyllia (struktur kecil di batang) adalah karakter diagnostik famili Thuidiaceae."
+  },
+  {
+    code: "CL-12", type: "hepaticae",
+    nameSci: "Lunularia cruciata", author: "(L.) Dumort.",
+    family: "Lunulariaceae", order: "Marchantiales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "🌙",
+    morfo: "Gemma cup berbentuk bulan sabit (lunate) — karakter paling diagnostik dan unik dalam Bryophyta.",
+    habitat: "Tanah, batu & tanah lembap; juga umum di lingkungan urban lembap.",
+    diag: { "Gemma lunate": 100, "Areolasi": 75, "Urban-toleran": 80, "Warna": 70 },
+    catatan: "Lunulariaceae adalah famili monogenerik. Gemma cup bulan sabit adalah autapomorfi absolut — tidak ada takson Bryophyta lain yang memiliki struktur ini. Mudah dikenali bahkan oleh pemula."
+  },
+  {
+    code: "CL-13", type: "musci",
+    nameSci: "Fissidens subbasilaris", author: "Broth.",
+    family: "Fissidentaceae", order: "Fissidentales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🌿",
+    morfo: "Daun tersusun dua baris seperti sisir (distichous), ukuran lebih kecil dari F. braunii.",
+    habitat: "Tanah, batu & tepi sungai lembap.",
+    diag: { "Distichous": 95, "Ukuran kecil": 85, "Sungai": 80, "Kepadatan": 70 },
+    catatan: "Fissidens adalah genus besar di tropis Asia; pembedaan spesies level memerlukan pengamatan sel costa dan sel alar di bawah mikroskop. F. subbasilaris umumnya lebih kecil dari F. braunii."
+  },
+  {
+    code: "CL-14", type: "musci",
+    nameSci: "Hyophila involuta", author: "(Hook.) A. Jaeger",
+    family: "Pottiaceae", order: "Pottiales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🪨",
+    morfo: "Ujung daun menggulung ke dalam saat kering (involute) — karakter hidromorfik diagnostik.",
+    habitat: "Permukaan batu yang lembap, toleran terhadap paparan sinar matahari.",
+    diag: { "Involute": 95, "Batu terbuka": 85, "Toleransi UV": 70, "Xerofit": 65 },
+    catatan: "Pottiaceae adalah famili lumut daun terbesar di habitat xerofit dan mesofit. Hyophila involuta menunjukkan plastisitas morfologi kuat — daun menggulung saat kering melindungi sel fotosintetik."
+  },
+  {
+    code: "CL-15", type: "musci",
+    nameSci: "Homalothecium nuttallii", author: "(Wilson) Broth.",
+    family: "Brachytheciaceae", order: "Hypnales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🌿",
+    morfo: "Hamparan rapat menyerupai karpet hijau, batang & cabang dengan daun tersusun rapi.",
+    habitat: "Batu & biji batang pohon; preferensi substrat permukaan vertikal.",
+    diag: { "Karpet": 90, "Substrat pohon": 85, "Kilap": 70, "Kepadatan": 85 },
+    catatan: "Homalothecium termasuk pleurokarp dalam Brachytheciaceae. Identifikasi memerlukan karakter sel alar dan costa. Sering simpatrik dengan Brachythecium plumosum."
+  },
+  {
+    code: "CL-16", type: "hepaticae",
+    nameSci: "Metzgeria furcata", author: "(L.) Dumort.",
+    family: "Metzgeriaceae", order: "Metzgeriales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "🌿",
+    morfo: "Talus pita bercabang dikotom tipis, midrib jelas terlihat, tepi berbulu silia.",
+    habitat: "Batang pohon & batu lembap di hutan; epifitik.",
+    diag: { "Midrib jelas": 90, "Dikotomi": 85, "Epifitik": 80, "Silia tepi": 75 },
+    catatan: "Metzgeriaceae adalah hepatik taloid sederhana dengan midrib tunggal — berbeda dari Marchantiales yang kompleks. M. furcata adalah spesies kosmopolit yang umum pada kulit pohon."
+  },
+  {
+    code: "CL-17", type: "hepaticae",
+    nameSci: "Solenostoma hyalinum", author: "(Lyell) Mitt.",
+    family: "Solenostomataceae", order: "Jungermanniales", classTax: "Jungermanniopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Berscale",
+    icon: "💎",
+    morfo: "Daun tipis dan transparan (hialin), batang merayap dengan sel berdinding tipis.",
+    habitat: "Tanah & batu berair; area basah permanen.",
+    diag: { "Hialin": 90, "Transparansi": 85, "Akuatik": 90, "Ukuran sel": 70 },
+    catatan: "Solenostoma adalah genus hepatik berdaun dengan sel berdinding tipis dan tanpa underleaf. Sifat hialin merupakan adaptasi terhadap habitat perairan dengan intensitas cahaya rendah."
+  },
+  {
+    code: "CL-18", type: "hepaticae",
+    nameSci: "Marchantia emarginata", author: "Reinw., Blume & Nees",
+    family: "Marchantiaceae", order: "Marchantiales", classTax: "Marchantiopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Talus",
+    icon: "🌿",
+    morfo: "Talus tebal berongga dengan gemma cup khas; anteridiofor bertangkai panjang.",
+    habitat: "Batu, tanah & tepi sungai lembap; habitat semi-terbuka.",
+    diag: { "Gemma cup": 85, "Anteridiofor": 80, "Batu sungai": 80, "Ketebalan": 75 },
+    catatan: "Marchantia emarginata adalah spesies Asia-Pasifik yang sering dikonfusikan dengan M. polymorpha. Perbedaan utama pada morfologi reseptakel betina dan detail areolasi pori udara."
+  },
+  {
+    code: "CL-19", type: "hepaticae",
+    nameSci: "Frullania calcarífera", author: "Steph.",
+    family: "Frullaniaceae", order: "Jungermanniales", classTax: "Jungermanniopsida",
+    division: "Marchantiophyta", subtype: "Lumut Hati · Berscale",
+    icon: "🍃",
+    morfo: "Daun berlobak dua, lobulusnya berbentuk kantung (helmet-shaped) yang menampung air.",
+    habitat: "Epifitik pada kulit batang/ranting pohon; toleran semi-kering.",
+    diag: { "Lobulus kantung": 95, "Epifitik": 90, "Toleransi": 70, "Underleaf": 80 },
+    catatan: "Frullaniaceae adalah hepatik berdaun epifitik dengan lobulus termodifikasi menjadi kantung air — adaptasi unik untuk habitat epifitik. Frullania adalah genus besar tropis dengan ratusan spesies."
+  },
+  {
+    code: "CL-20", type: "musci",
+    nameSci: "Ceratodon purpureus", author: "(Hedw.) Brid.",
+    family: "Ditrichaceae", order: "Dicranales", classTax: "Bryopsida",
+    division: "Bryophyta", subtype: "Lumut Daun",
+    icon: "🔴",
+    morfo: "Seta merah keunguan, kapsul spora silindris berkedut longitudinal saat kering.",
+    habitat: "Tanah terbuka, tukul & cahaya; pionir disturbansi.",
+    diag: { "Seta merah": 95, "Kapsul": 85, "Pionir": 90, "Toleransi": 85 },
+    catatan: "Ceratodon purpureus adalah kosmopolit ekstrem — ditemukan dari tropis hingga Antartika. Seta merahnya adalah karakter visual paling ikonik. Pionir kuat pada substrat terganggu."
+  }
+];
+
+function renderCards(filter) {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  TAXA.forEach(t => {
+    if (filter !== 'all' && t.type !== filter) return;
+    const isH = t.type === 'hepaticae';
+    const card = document.createElement('div');
+    card.className = 'species-card';
+    card.setAttribute('data-type', t.type);
+    card.innerHTML = `
+      <div class="card-accent ${isH ? 'accent-hepaticae' : 'accent-musci'}"></div>
+      <div class="card-img-wrap" style="background:${isH ? '#f2f7ed' : '#e8f5f2'}">
+        <div class="specimen-bg-pattern" style="color:${isH ? '#3B6D11' : '#0F6E56'}"></div>
+        <div class="card-img-placeholder">
+          <div class="specimen-icon">${t.icon}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-code">${t.code} · ${t.family}</div>
+        <div class="card-name-sci">${t.nameSci}</div>
+        <div class="card-name-author">${t.author}</div>
+        <span class="card-type-badge ${isH ? 'badge-hepaticae' : 'badge-musci'}">${isH ? 'Lumut Hati' : 'Lumut Daun'}</span>
+        <div class="card-divider"></div>
+        <div class="card-morfo">${t.morfo}</div>
+        <div class="card-habitat"><i class="ti ti-map-pin" style="font-size:11px;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>${t.habitat}</div>
+        <button class="card-detail-btn" onclick="openDetail('${t.code}')">Lihat taksonomi lengkap ↗</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterCards(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(filter);
+}
+
+function openDetail(code) {
+  const t = TAXA.find(x => x.code === code);
+  if (!t) return;
+  const isH = t.type === 'hepaticae';
+  const accent = document.getElementById('detailAccent');
+  accent.style.background = isH ? '#3B6D11' : '#0F6E56';
+
+  const diagRows = Object.entries(t.diag).map(([k, v]) =>
+    `<div class="diag-row">
+      <span class="diag-label">${k}</span>
+      <div class="diag-bar-wrap"><div class="diag-bar" style="width:${v}%;background:${isH ? '#639922' : '#1D9E75'}"></div></div>
+      <span class="diag-val">${v < 60 ? 'rendah' : v < 80 ? 'sedang' : 'tinggi'}</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-code">${t.code} · Specimen Field Record</div>
+    <div class="detail-name-sci">${t.nameSci}</div>
+    <div class="detail-author">${t.author}</div>
+    <div class="detail-badges">
+      <span class="detail-badge db-family">${t.family}</span>
+      <span class="detail-badge ${isH ? 'db-type-h' : 'db-type-m'}">${isH ? 'Hepaticae' : 'Musci'}</span>
+      <span class="detail-badge db-sub">${t.subtype}</span>
+    </div>
+    <div class="detail-taxa-grid">
+      <div class="taxa-item"><div class="taxa-rank">Divisi</div><div class="taxa-value">${t.division}</div></div>
+      <div class="taxa-item"><div class="taxa-rank">Kelas</div><div class="taxa-value">${t.classTax}</div></div>
+      <div class="taxa-item"><div class="taxa-rank">Ordo</div><div class="taxa-value">${t.order}</div></div>
+      <div class="taxa-item"><div class="taxa-rank">Famili</div><div class="taxa-value">${t.family}</div></div>
+    </div>
+    <div class="detail-diag-strip">
+      <div class="diag-strip-title">Profil Karakter Diagnostik</div>
+      ${diagRows}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Morfologi</div>
+      <div class="detail-section-body">${t.morfo}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Habitat & Substrat</div>
+      <div class="detail-section-body">${t.habitat}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Catatan Taksonomi</div>
+      <div class="detail-section-body">${t.catatan}</div>
+    </div>
+    <button class="card-detail-btn" style="margin-top:0" onclick="sendPrompt('Jelaskan lebih detail taksonomi dan ekologi ${t.nameSci} dalam konteks Bryophyta Asia Tenggara')">Eksplorasi lebih lanjut ↗</button>
+  `;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function closeDetail(e) {
+  if (e.target === document.getElementById('detailOverlay')) closeDetailBtn();
+}
+function closeDetailBtn() {
+  document.getElementById('detailOverlay').classList.remove('open');
+}
+
+renderCards('all');
+</script>
